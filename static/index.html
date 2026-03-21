@@ -20,11 +20,11 @@
         <h1>Placas Solares<br><span class="accent">Benet Cortada</span></h1>
         <p class="subtitle">Propuesta de Autoconsumo Colectivo · Junta de Vecinos 2026</p>
         <div class="hero-stats">
-            <div class="hero-stat"><span class="hero-num">59</span><span class="hero-label">Paneles</span></div>
-            <div class="hero-stat"><span class="hero-num">26,5</span><span class="hero-label">kWp</span></div>
-            <div class="hero-stat"><span class="hero-num">30.996</span><span class="hero-label">kWh/año</span></div>
-            <div class="hero-stat"><span class="hero-num">41.439 €</span><span class="hero-label">Coste total</span></div>
-            <div class="hero-stat hero-stat-alt"><span class="hero-num-alt">44.131 €</span><span class="hero-label-alt">Con financiación*</span></div>
+            <div class="hero-stat"><span class="hero-num" id="hero-panels">--</span><span class="hero-label">Paneles</span></div>
+            <div class="hero-stat"><span class="hero-num" id="hero-kwp">--</span><span class="hero-label">kWp</span></div>
+            <div class="hero-stat"><span class="hero-num" id="hero-kwh">--</span><span class="hero-label">kWh/año</span></div>
+            <div class="hero-stat"><span class="hero-num" id="hero-cost">--</span><span class="hero-label">Coste total</span></div>
+            <div class="hero-stat hero-stat-alt"><span class="hero-num-alt" id="hero-cost-fin">--</span><span class="hero-label-alt">Con financiación*</span></div>
         </div>
         <p class="hero-note">*Incluye intereses y gastos de notario. Sin entrada inicial.</p>
     </div>
@@ -40,8 +40,8 @@
         <div class="two-parts">
             <div class="part-card community">
                 <div class="part-badge">PARTE COMUNITARIA</div>
-                <h3>La pagamos todos (24 vecinos)</h3>
-                <p>Alimenta los <strong>servicios comunes</strong>: ascensores, iluminación, bombas de agua. Reduce la factura de electricidad de la comunidad.</p>
+                <h3>La pagamos todos por coeficientes</h3>
+                <p>Alimenta los <strong>servicios comunes</strong>: ascensores, iluminación, ventilación. Reduce la factura de electricidad de la comunidad.</p>
                 <ul>
                     <li>41% de la energía solar generada</li>
                     <li>Ahorro en los gastos de comunidad</li>
@@ -54,8 +54,9 @@
                 <p>Alimenta <strong>tu vivienda</strong>. Reduce tu factura personal de la luz. Cuantos menos participen, más energía toca a cada uno.</p>
                 <ul>
                     <li>59% de la energía solar generada</li>
+                    <li>A repartir entre los propietarios que participan</li>
+                    <li>Cada propietario paga su parte</li>
                     <li>Ahorro directo en tu factura</li>
-                    <li>A menos vecinos, más ahorro individual</li>
                 </ul>
             </div>
         </div>
@@ -71,31 +72,31 @@
         <p class="section-desc">Mueve el slider para ver cómo cambian los números de la <strong>parte privativa</strong>. La parte comunitaria no cambia.</p>
 
         <div class="slider-box">
-            <label for="participants">Vecinos con placas privativas:</label>
+            <label for="participants">Propietarios con placas privativas:</label>
             <div class="slider-row">
-                <input type="range" id="participants" min="2" max="24" step="2" value="24">
-                <span class="slider-value" id="slider-val">24</span>
+                <input type="range" id="participants" min="2" max="28" step="2" value="28">
+                <span class="slider-value" id="slider-val">28</span>
             </div>
             <div class="slider-labels">
-                <span>2</span><span>4</span><span>8</span><span>12</span><span>16</span><span>20</span><span>24</span>
+                <span>2</span><span>4</span><span>8</span><span>12</span><span>16</span><span>20</span><span>24</span><span>28</span>
             </div>
         </div>
 
         <!-- ── COMMUNITY KPIs (fixed) ── -->
         <div class="section-header community-header">
             <span class="section-icon">🏢</span>
-            <h3>Parte Comunitaria <small>(todos los vecinos)</small></h3>
+            <h3>Parte Comunitaria <small>(todos los propietarios)</small></h3>
         </div>
         <div class="kpi-grid" id="kpi-community">
             <div class="kpi-card">
                 <div class="kpi-label">Tu parte del coste</div>
                 <div class="kpi-value" id="comm-cost">--</div>
-                <div class="kpi-sub">por vecino (de 24)</div>
+                <div class="kpi-sub">por propietario (de 28)</div>
             </div>
             <div class="kpi-card blue">
                 <div class="kpi-label">Cuota mensual financiada</div>
                 <div class="kpi-value" id="comm-monthly">--</div>
-                <div class="kpi-sub">estimada a 36 meses, 0 € entrada</div>
+                <div class="kpi-sub" id="comm-monthly-sub">estimada a -- meses, 0 € entrada</div>
             </div>
             <div class="kpi-card green">
                 <div class="kpi-label">Ahorro en comunidad</div>
@@ -111,6 +112,11 @@
                 <div class="kpi-label">Energía para zonas comunes</div>
                 <div class="kpi-value" id="comm-energy">--</div>
                 <div class="kpi-sub">kWh/año</div>
+            </div>
+            <div class="kpi-card highlight-payback">
+                <div class="kpi-label">Retorno de inversión</div>
+                <div class="kpi-value" id="comm-payback">--</div>
+                <div class="kpi-sub">años para recuperar lo invertido</div>
             </div>
         </div>
 
@@ -128,23 +134,27 @@
             <div class="kpi-card blue">
                 <div class="kpi-label">Cuota mensual privativa</div>
                 <div class="kpi-value" id="priv-monthly">--</div>
-                <div class="kpi-sub">solo la parte extra privativa (36 meses)</div>
+                <div class="kpi-sub" id="priv-monthly-sub">parte extra privativa · -- meses</div>
             </div>
             <div class="kpi-card green">
-                <div class="kpi-label">Ahorro en tu factura</div>
+                <div class="kpi-label">Ahorro energético estimado</div>
                 <div class="kpi-value" id="priv-savings">--</div>
-                <div class="kpi-sub">año 1, en tu factura personal</div>
-            </div>
-            <div class="kpi-card blue">
-                <div class="kpi-label">% de tu factura cubierto</div>
-                <div class="kpi-value" id="priv-pct">--</div>
-                <div class="kpi-sub">de tu consumo eléctrico</div>
+                <div class="kpi-sub">año 1 · media 64% autoconsumo · <a href="#perfiles" style="color:#10b981;font-weight:600;">ver tu caso ↓</a></div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-label">Energía para tu piso</div>
+                <div class="kpi-label">Energía solar para tu piso</div>
                 <div class="kpi-value" id="priv-energy">--</div>
-                <div class="kpi-sub">kWh/año</div>
+                <div class="kpi-sub">kWh/año producidos para ti</div>
             </div>
+        </div>
+
+        <!-- ── PERFILES DE AHORRO ── -->
+        <div id="perfiles" class="section-header profiles-inline-header" style="margin-top:40px;border-bottom-color:#10b981;">
+            <span class="section-icon">💡</span>
+            <h3>¿Cuánto me ahorro según mi tipo de vivienda? <small>(los números cambian con el slider)</small></h3>
+        </div>
+        <div class="profiles-grid" id="profiles-grid">
+            <!-- Filled by JS -->
         </div>
 
         <!-- ── DEDUCCIONES ── -->
@@ -211,7 +221,8 @@
             <div class="total-card non-participant">
                 <div class="total-title">Solo comunitaria</div>
                 <div class="total-row"><span>Inversión total</span><span class="total-val" id="tot-cost-no">--</span></div>
-                <div class="total-row"><span>Ahorro año 1 (energía + IBI)</span><span class="total-val green-text" id="tot-sav-no">--</span></div>
+                <div class="total-row"><span>☀️ Ahorro en luz (estimado)</span><span class="total-val green-text" id="tot-energy-no">--</span></div>
+                <div class="total-row"><span>🏛️ Bonificación IBI año 1</span><span class="total-val green-text" id="tot-ibi-no">--</span></div>
                 <div class="total-row"><span>Amortización</span><span class="total-val" id="tot-payback-no">--</span></div>
                 <div class="total-row"><span>Cuota financiación</span><span class="total-val" id="tot-cuota-no">--</span></div>
                 <div class="total-row highlight"><span>Beneficio neto 25 años</span><span class="total-val green-text" id="tot-benef-no">--</span></div>
@@ -220,13 +231,14 @@
                 <div class="total-badge">RECOMENDADO</div>
                 <div class="total-title">Comunitaria + Privativa</div>
                 <div class="total-row"><span>Inversión total</span><span class="total-val" id="tot-cost-yes">--</span></div>
-                <div class="total-row"><span>Ahorro año 1 (energía + IBI)</span><span class="total-val green-text" id="tot-sav-yes">--</span></div>
+                <div class="total-row"><span>☀️ Ahorro en luz (estimado)</span><span class="total-val green-text" id="tot-energy-yes">--</span></div>
+                <div class="total-row"><span>🏛️ Bonificación IBI año 1</span><span class="total-val green-text" id="tot-ibi-yes">--</span></div>
                 <div class="total-row"><span>Amortización</span><span class="total-val" id="tot-payback-yes">--</span></div>
                 <div class="total-row"><span>Cuota financiación</span><span class="total-val" id="tot-cuota-yes">--</span></div>
                 <div class="total-row highlight"><span>Beneficio neto 25 años</span><span class="total-val green-text" id="tot-benef-yes">--</span></div>
             </div>
         </div>
-        <p class="assumptions-note">* Los cálculos asumen una <strong>subida del precio de la electricidad del 2% anual</strong> y una degradación de los paneles del 0,4% anual. Cuanto más suba la luz, más ahorras con las placas.</p>
+        <p class="assumptions-note" id="assumptions-note">* Los cálculos asumen una <strong>subida del precio de la electricidad del 2% anual</strong> y una degradación de los paneles del 0,4% anual. Cuanto más suba la luz, más ahorras con las placas.</p>
     </div>
 </section>
 
@@ -262,19 +274,6 @@
 
 
 <!-- ═══════════════════════════════════════════════════════════
-     HOUSEHOLD PROFILES
-     ═══════════════════════════════════════════════════════════ -->
-<section class="profiles-section">
-    <div class="container">
-        <h2>¿Cuánto me ahorro según mi tipo de vivienda?</h2>
-        <p class="section-desc">Estimación del ahorro en tu factura personal de la luz según tu perfil de consumo. Los números cambian con el slider de participantes.</p>
-        <div class="profiles-grid" id="profiles-grid">
-            <!-- Filled by JS -->
-        </div>
-    </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════
      PROJECT INFO
      ═══════════════════════════════════════════════════════════ -->
 <section class="info-section">
@@ -293,28 +292,29 @@
             <div class="info-card">
                 <h3>Energía</h3>
                 <ul>
-                    <li><strong>Producción:</strong> 30.996 kWh/año</li>
-                    <li><strong>Reparto:</strong> 41% común · 59% privado</li>
-                    <li><strong>Autoconsumo común:</strong> 65%</li>
-                    <li><strong>Autoconsumo privado:</strong> 54%</li>
-                    <li><strong>Subida luz estimada:</strong> +2% anual</li>
-                    <li><strong>Degradación paneles:</strong> 0,4% anual</li>
+                    <li id="info-prod"><strong>Producción:</strong> --</li>
+                    <li id="info-split"><strong>Reparto:</strong> --</li>
+                    <li id="info-ac-common"><strong>Autoconsumo común:</strong> --</li>
+                    <li id="info-ac-private"><strong>Autoconsumo privado:</strong> --</li>
+                    <li id="info-price-light"><strong>Subida luz estimada:</strong> --</li>
+                    <li id="info-degradation"><strong>Degradación paneles:</strong> --</li>
                 </ul>
             </div>
             <div class="info-card">
                 <h3>Financiación</h3>
                 <ul>
                     <li><strong>Entrada:</strong> 0 €</li>
-                    <li><strong>Plazo:</strong> 36 meses</li>
-                    <li><strong>TAE:</strong> 4,8%</li>
+                    <li id="info-fin-months"><strong>Plazo:</strong> --</li>
+                    <li id="info-fin-tin"><strong>TIN:</strong> --</li>
+                    <li id="info-fin-tae"><strong>TAE:</strong> --</li>
                     <li><strong>Carencia:</strong> 0 meses</li>
                 </ul>
             </div>
             <div class="info-card">
                 <h3>Mantenimiento</h3>
                 <ul>
-                    <li><strong>Coste anual comunidad:</strong> 560 €/año</li>
-                    <li><strong>Por vecino:</strong> ~17 €/año</li>
+                    <li id="info-maint-total"><strong>Coste anual comunidad:</strong> --</li>
+                    <li id="info-maint-pp"><strong>Por vecino:</strong> --</li>
                     <li>Incluye limpieza de paneles y revisión de inversores</li>
                     <li>Lo cobra el instalador (Adymus)</li>
                 </ul>
@@ -322,9 +322,9 @@
             <div class="info-card">
                 <h3>Deducciones</h3>
                 <ul>
-                    <li><strong>IBI:</strong> 50% durante 7 años (Sant Cugat)</li>
-                    <li><strong>Límite IBI:</strong> 60% del coste instalación</li>
-                    <li><strong>IRPF:</strong> 20-60% del coste (renta)</li>
+                    <li id="info-ibi-rate"><strong>IBI:</strong> --</li>
+                    <li id="info-ibi-cap"><strong>Límite IBI:</strong> --</li>
+                    <li id="info-irpf-rate"><strong>IRPF:</strong> --</li>
                     <li><strong>Más inversión = más te devuelven</strong></li>
                 </ul>
             </div>
@@ -340,19 +340,19 @@
             <div class="loan-grid">
                 <div class="loan-metric highlight">
                     <span class="loan-label">Cuota mensual</span>
-                    <strong>1.221,60 €</strong>
+                    <strong id="loan-monthly">--</strong>
                 </div>
                 <div class="loan-metric">
                     <span class="loan-label">TIN</span>
-                    <strong>3,90%</strong>
+                    <strong id="loan-tin">--</strong>
                 </div>
                 <div class="loan-metric">
                     <span class="loan-label">TAE</span>
-                    <strong>4,23%</strong>
+                    <strong id="loan-tae">--</strong>
                 </div>
                 <div class="loan-metric">
                     <span class="loan-label">Intereses totales</span>
-                    <strong>2.538,65 €</strong>
+                    <strong id="loan-interest">--</strong>
                 </div>
                 <div class="loan-metric">
                     <span class="loan-label">Comisiones</span>
@@ -361,7 +361,7 @@
                 </div>
                 <div class="loan-metric">
                     <span class="loan-label">Gastos aproximados</span>
-                    <strong>Notario: 153,33 €</strong>
+                    <strong id="loan-notary">--</strong>
                 </div>
             </div>
 
@@ -418,7 +418,7 @@
         </div>
     </div>
 </section>
-
+<br/>
 <footer>
     <div class="container">
         <p class="footer-title">Benet Cortada · Propuesta Autoconsumo Colectivo · 2026</p>
@@ -428,46 +428,46 @@
                 <div>
                     <strong>Instalación</strong>
                     <ul>
-                        <li>59 paneles LONGi 450W = 26,47 kWp</li>
-                        <li>Producción año 1: 30.996 kWh</li>
-                        <li>Coste total (IVA incl.): 41.439 €</li>
-                        <li>Reparto: 41% común / 59% privado</li>
+                        <li id="foot-panels">--</li>
+                        <li id="foot-prod">--</li>
+                        <li id="foot-cost">--</li>
+                        <li id="foot-split">--</li>
                     </ul>
                 </div>
                 <div>
                     <strong>Autoconsumo</strong>
                     <ul>
-                        <li>Autoconsumo zonas comunes: 65%</li>
-                        <li>Autoconsumo viviendas: 54%</li>
-                        <li>Precio medio electricidad: 0,20 €/kWh</li>
-                        <li>Compensación excedentes: 0,05 €/kWh</li>
+                        <li id="foot-ac-common">--</li>
+                        <li id="foot-ac-private">--</li>
+                        <li id="foot-price-kwh">--</li>
+                        <li id="foot-exc-kwh">--</li>
                     </ul>
                 </div>
                 <div>
                     <strong>Proyecciones</strong>
                     <ul>
-                        <li>Subida precio luz: +2% anual</li>
-                        <li>Degradación paneles: -0,4% anual</li>
-                        <li>Vida útil: 25 años</li>
+                        <li id="foot-price-inc">--</li>
+                        <li id="foot-degradation">--</li>
+                        <li id="foot-lifetime">--</li>
                         <li>Garantía rendimiento: 90% en año 25</li>
                     </ul>
                 </div>
                 <div>
                     <strong>Financiación y costes</strong>
                     <ul>
-                        <li>Financiación: 36 meses, 0 € entrada</li>
-                        <li>TAE: 4,8%</li>
-                        <li>Mantenimiento: 560 €/año (~17 €/vecino)</li>
-                        <li>IBI estimado medio: 900 €/año</li>
+                        <li id="foot-fin-months">--</li>
+                        <li id="foot-fin-rates">--</li>
+                        <li id="foot-maint">--</li>
+                        <li id="foot-ibi-avg">--</li>
                     </ul>
                 </div>
                 <div>
                     <strong>Deducciones</strong>
                     <ul>
-                        <li>IBI Sant Cugat: 50% × 7 años</li>
-                        <li>Tope IBI: 60% del coste instalación</li>
-                        <li>IRPF: 20% (puede ser 40-60%)</li>
-                        <li>Tope base IRPF: 5.000 €/año</li>
+                        <li id="foot-ibi-ded">--</li>
+                        <li id="foot-ibi-cap">--</li>
+                        <li id="foot-irpf">--</li>
+                        <li id="foot-irpf-max">--</li>
                     </ul>
                 </div>
             </div>

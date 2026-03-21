@@ -33,12 +33,12 @@ TOTAL_PANELS = 59
 TOTAL_KWP = 26.47
 TOTAL_PRODUCTION_Y1_KWH = 30_996
 TOTAL_COST_IVA = 41_439
-TOTAL_DWELLINGS = 24
+TOTAL_DWELLINGS = 28   # 24 vecinos + 4 locales (todos pagan comunitaria y pueden apuntarse a privativa)
 
 COMMON_ENERGY_RATIO = 0.41
 PRIVATE_ENERGY_RATIO = 0.59
-AUTOCONSUMO_COMMON = 0.65
-AUTOCONSUMO_PRIVATE = 0.54
+#AUTOCONSUMO_COMMON = 0.65
+#AUTOCONSUMO_PRIVATE = 0.54
 
 COMMON_CONSUMPTION_KWH = 25_486  # common areas: elevators, lights, pool, etc
 PRIVATE_CONSUMPTION_KWH = 15_146  # TODO: sample data from 4 dwellings - needs recalculation for 24
@@ -53,12 +53,17 @@ IBI_CAP_RATIO = 0.60  # max 60% of installation cost
 AVG_ANNUAL_IBI = 900  # estimated average IBI bill in Sant Cugat
 
 # Maintenance
-MAINTENANCE_COMMUNITY_ANNUAL = 560  # total community
-MAINTENANCE_PER_OWNER = 17  # vendor stated
+MAINTENANCE_ANNUAL = 560  # total community
+MAINTENANCE_COMMUNITY_ANNUAL = MAINTENANCE_ANNUAL * COMMON_ENERGY_RATIO
+MAINTENANCE_PER_OWNER = MAINTENANCE_COMMUNITY_ANNUAL/TOTAL_DWELLINGS 
 
-# Financing
+# Financing — préstamo Caixa Guissona para comunidades
+# TIN 3,90% → cuota mensual: 41.439 × (0.00325 × 1.00325^36) / (1.00325^36 − 1) = 1.221,60 €
+# TAE 4,23% (incluye gastos). Notaría: 153,33 € (pago único, no en cuota)
 FINANCING_MONTHS = 36
-FINANCING_TAE = 0.048
+FINANCING_TIN = 0.039    # tipo nominal anual → divide entre 12 para cuota mensual
+FINANCING_TAE = 0.0423   # solo informativo / display
+FINANCING_NOTARY = 153.33  # gastos de notaría (pago único, no en cuota)
 
 # IRPF deduction (Spain, obras hasta 31/12/2025)
 # 20% if reduces heating/cooling demand by 7%
@@ -78,23 +83,42 @@ COMMON_COST_TOTAL = TOTAL_COST_IVA * COMMON_ENERGY_RATIO      # 41% × 41,439 = 
 PRIVATE_COST_TOTAL = TOTAL_COST_IVA * PRIVATE_ENERGY_RATIO    # 59% × 41,439 = 24,449 EUR
 
 # Per-dwelling baseline (for reference)
-COMMON_COST_PER_DWELLING = COMMON_COST_TOTAL / TOTAL_DWELLINGS  # 16,990 / 24 = 708 EUR
-PRIVATE_COST_PER_DWELLING = PRIVATE_COST_TOTAL / TOTAL_DWELLINGS # 24,449 / 24 = 1,019 EUR
+COMMON_COST_PER_DWELLING = COMMON_COST_TOTAL / TOTAL_DWELLINGS   # 16,990 / 28 = 607 EUR
+PRIVATE_COST_PER_DWELLING = PRIVATE_COST_TOTAL / TOTAL_DWELLINGS  # 24,449 / 28 = 873 EUR
 
-# Energy figures (kWh produced and autoconsumed)
-TOTAL_COMMON_ENERGY = TOTAL_PRODUCTION_Y1_KWH * COMMON_ENERGY_RATIO          # 41% × 30,996 = 12,708 kWh
-TOTAL_PRIVATE_ENERGY = TOTAL_PRODUCTION_Y1_KWH * PRIVATE_ENERGY_RATIO        # 59% × 30,996 = 18,288 kWh
+# Energy figures (kWh produced per part)
+AC_COMMON_KWH  = TOTAL_PRODUCTION_Y1_KWH * COMMON_ENERGY_RATIO   # total producido para comunes = 12,708 kWh
+AC_PRIVATE_KWH = TOTAL_PRODUCTION_Y1_KWH * PRIVATE_ENERGY_RATIO  # total producido para privados = 18,288 kWh
 
-AC_COMMON_KWH = TOTAL_COMMON_ENERGY * AUTOCONSUMO_COMMON                      # 65% × 12,708 = 8,260 kWh
-AC_PRIVATE_KWH = TOTAL_PRIVATE_ENERGY * AUTOCONSUMO_PRIVATE                   # 54% × 18,288 = 9,875 kWh
+# Autoconsumo rates — qué % de la producción solar se consume directamente (no va a la red)
+# NOTA: el experto da el % DE FACTURA CUBIERTO (output), no la tasa de autoconsumo (input):
+#   Comunidad : 32% factura cubierta → 32% = AC_kwh / consumo = 12.708 × rate / 25.486
+#               → rate = 0.32 × 25.486 / 12.708 = 0.64
+#   Privativa : 64% factura cubierta → pendiente de revisar consumo real de las 28 viviendas
+# TODO: cuando tengamos perfiles de consumo individuales, el privativo variará por perfil
+AUTOCONSUMO_COMMON   = 0.64  # → 12.708 × 0.64 = 8.133 kWh ≈ 32% de los 25.486 kWh comunales
+AUTOCONSUMO_PRIVATE  = 0.64  # tasa estimada; bill coverage depende del consumo real privativo
+
+# kWh desglosados: autoconsumo directo vs excedentes a la red
+COMMON_AUTOCONSUMED_KWH  = AC_COMMON_KWH  * AUTOCONSUMO_COMMON             # 12,708 × 0.64 = 8,133 kWh
+COMMON_EXCEDENTES_KWH    = AC_COMMON_KWH  * (1 - AUTOCONSUMO_COMMON)       # 12,708 × 0.36 = 4,575 kWh
+PRIVATE_AUTOCONSUMED_KWH = AC_PRIVATE_KWH * AUTOCONSUMO_PRIVATE            # 18,288 × 0.54 = 9,876 kWh
+PRIVATE_EXCEDENTES_KWH   = AC_PRIVATE_KWH * (1 - AUTOCONSUMO_PRIVATE)      # 18,288 × 0.46 = 8,412 kWh
 
 # Electricity costs
-ELECTRICITY_PRICE = 0.20  # EUR/kWh (blended rate)
-EXCEDENTES_PRICE = 0.05  # EUR/kWh (compensation for surplus)
+ELECTRICITY_PRICE  = 0.20  # EUR/kWh (blended rate, precio de mercado evitado)
+EXCEDENTES_PRICE   = 0.05  # EUR/kWh (compensación excedentes volcados a red)
 
-# Annual savings from autoconsumo (before maintenance)
-COMMON_GROSS_SAVINGS_Y1 = AC_COMMON_KWH * ELECTRICITY_PRICE                  # 8,260 × 0.20 = 1,652 EUR
-PRIVATE_GROSS_SAVINGS_Y1_TOTAL = AC_PRIVATE_KWH * ELECTRICITY_PRICE          # 9,875 × 0.20 = 1,975 EUR
+# Annual savings (autoconsumo al precio de mercado + excedentes a precio compensación)
+COMMON_GROSS_SAVINGS_Y1 = (
+    COMMON_AUTOCONSUMED_KWH * ELECTRICITY_PRICE   # 8,133 × 0.20 = 1,626.60 EUR
+    + COMMON_EXCEDENTES_KWH * EXCEDENTES_PRICE    # 4,575 × 0.05 =   228.75 EUR
+)  # total comunidad = 1,855.35 EUR
+
+PRIVATE_GROSS_SAVINGS_Y1_TOTAL = (
+    PRIVATE_AUTOCONSUMED_KWH * ELECTRICITY_PRICE  # 9,876 × 0.20 = 1,975.20 EUR
+    + PRIVATE_EXCEDENTES_KWH * EXCEDENTES_PRICE   # 8,412 × 0.05 =   420.60 EUR
+)  # total privado = 2,395.80 EUR
 PRIVATE_GROSS_SAVINGS_Y1_PER_PARTICIPANT = PRIVATE_GROSS_SAVINGS_Y1_TOTAL / TOTAL_DWELLINGS
 
 
@@ -111,7 +135,7 @@ class CommunityDetail(BaseModel):
     excedentes_kwh: float
     savings_pct: float  # % of common bill covered
     savings_eur_y1: float  # gross energy savings
-    maintenance_per_dwelling: float
+    maitenance_community_annual: float
     net_savings_y1: float  # after maintenance
 
 
@@ -148,10 +172,10 @@ class IRPFDetail(BaseModel):
 
 
 class FinancingDetail(BaseModel):
-    monthly_community_only: float
-    monthly_with_private: float
+    monthly_community_only: float   # cuota comunitaria por vecino/local (28 en total)
+    monthly_private_only: float     # cuota privativa por participante (solo los que se apuntan)
     total_cost_community_only: float
-    total_cost_with_private: float
+    total_cost_private_only: float
 
 
 class MaintenanceDetail(BaseModel):
@@ -184,12 +208,18 @@ class ScenarioResult(BaseModel):
     roi_25y_participant: float
     roi_25y_non_participant: float
 
+    # Desglose año 1 por propietario (para mostrar energía e IBI por separado)
+    energy_savings_y1_non_participant: float  # ahorro en luz (solo comunitaria)
+    energy_savings_y1_participant: float      # ahorro en luz (comunitaria + privativa)
+    ibi_savings_y1_non_participant: float     # bonificación IBI año 1 (solo comunitaria)
+    ibi_savings_y1_participant: float         # bonificación IBI año 1 (comunitaria + privativa)
+
     yearly_cashflow_participant: list[dict]
     yearly_cashflow_non_participant: list[dict]
 
 
 def _calc_financing(amount: float) -> float:
-    mr = FINANCING_TAE / 12
+    mr = FINANCING_TIN / 12  # tipo mensual = TIN anual / 12
     if mr > 0 and amount > 0:
         return amount * (mr * (1 + mr) ** FINANCING_MONTHS) / ((1 + mr) ** FINANCING_MONTHS - 1)
     return amount / FINANCING_MONTHS if amount > 0 else 0
@@ -246,27 +276,29 @@ def calculate_scenario(inp: ScenarioInput) -> ScenarioResult:
     avg_ibi = inp.avg_annual_ibi
 
     # ══════════════════════════════════════════════════════════
-    # COMMUNITY PART (paid by all 24)
+    # COMMUNITY PART (paid by all 28)
     # ══════════════════════════════════════════════════════════
-    comm_cost_pp = COMMON_COST_TOTAL / TOTAL_DWELLINGS
-    comm_energy = TOTAL_COMMON_ENERGY
-    comm_ac = AC_COMMON_KWH
-    comm_exc = comm_energy - comm_ac
-    comm_sav_pct = (comm_ac / COMMON_CONSUMPTION_KWH * 100) if COMMON_CONSUMPTION_KWH else 0
-    comm_sav_eur = COMMON_GROSS_SAVINGS_Y1 / TOTAL_DWELLINGS  # per dwelling
-    comm_net_y1 = comm_sav_eur - MAINTENANCE_PER_OWNER
+    comm_cost_pp  = COMMON_COST_TOTAL / TOTAL_DWELLINGS          # coste por propietario
+    comm_energy   = AC_COMMON_KWH                                 # total producido comunitario
+    comm_ac       = COMMON_AUTOCONSUMED_KWH                       # kWh autoconsumedos directamente
+    comm_exc      = COMMON_EXCEDENTES_KWH                         # kWh volcados a red
+    comm_sav_pct  = (comm_ac / COMMON_CONSUMPTION_KWH * 100) if COMMON_CONSUMPTION_KWH else 0
+    comm_net_y1   = COMMON_GROSS_SAVINGS_Y1 - MAINTENANCE_COMMUNITY_ANNUAL  # ahorro neto TOTAL comunidad
+    # ahorro por propietario (para calcular payback individual)
+    comm_sav_eur_pp = COMMON_GROSS_SAVINGS_Y1 / TOTAL_DWELLINGS
 
     # ══════════════════════════════════════════════════════════
     # PRIVATE PART (paid by n participants)
     # ══════════════════════════════════════════════════════════
-    priv_cost_pp = PRIVATE_COST_TOTAL / n
-    priv_energy = TOTAL_PRIVATE_ENERGY
-    priv_energy_pp = priv_energy / n
-    priv_ac_pp = AC_PRIVATE_KWH / n
-    priv_exc = priv_energy - AC_PRIVATE_KWH
-    priv_cons_pp = PRIVATE_CONSUMPTION_KWH / TOTAL_DWELLINGS
-    priv_sav_pct = min((priv_ac_pp / priv_cons_pp * 100) if priv_cons_pp else 0, 100)
-    priv_sav_eur = PRIVATE_GROSS_SAVINGS_Y1_TOTAL / n  # scales with fewer participants
+    priv_cost_pp    = PRIVATE_COST_TOTAL / n
+    priv_energy_pp  = AC_PRIVATE_KWH / n                  # kWh producidos por participante
+    priv_ac_pp      = PRIVATE_AUTOCONSUMED_KWH / n        # kWh autoconsumidos por participante (64% de lo producido)
+    priv_exc_pp     = PRIVATE_EXCEDENTES_KWH / n          # kWh excedentes por participante
+    # Nota: priv_sav_pct sin base de consumo fiable (PRIVATE_CONSUMPTION_KWH es muestra de 4 viviendas)
+    # Se mantiene para referencia pero no se muestra en la UI → los perfiles dan el dato real
+    priv_cons_pp    = PRIVATE_CONSUMPTION_KWH / TOTAL_DWELLINGS
+    priv_sav_pct    = min((priv_ac_pp / priv_cons_pp * 100) if priv_cons_pp else 0, 100)
+    priv_sav_eur    = PRIVATE_GROSS_SAVINGS_Y1_TOTAL / n  # ahorro energético medio (tasa 64%)
 
     # ══════════════════════════════════════════════════════════
     # IBI — depends on total investment
@@ -299,27 +331,34 @@ def calculate_scenario(inp: ScenarioInput) -> ScenarioResult:
     # ══════════════════════════════════════════════════════════
     # FINANCING
     # ══════════════════════════════════════════════════════════
-    mp_comm = _calc_financing(comm_cost_pp)
-    mp_total = _calc_financing(total_pp)
+    # Una única financiación sobre el coste TOTAL del proyecto
+    # Se divide luego según el porcentaje comunitario/privativo
+    monthly_total = _calc_financing(TOTAL_COST_IVA)
+
+    # Cuota mensual de la parte comunitaria (41% del total) entre los 28 propietarios
+    mp_comm = (monthly_total * COMMON_ENERGY_RATIO) / TOTAL_DWELLINGS
+
+    # Cuota mensual de la parte privativa (59% del total) entre los n participantes
+    mp_priv = (monthly_total * PRIVATE_ENERGY_RATIO) / n
 
     # ══════════════════════════════════════════════════════════
-    # CASHFLOWS
+    # CASHFLOWS  — todo en escala POR PROPIETARIO
     # ══════════════════════════════════════════════════════════
 
-    # Participant: community savings + private savings + IBI (with private)
-    gross_participant = comm_sav_eur + priv_sav_eur
+    # Participante: su parte del ahorro comunitario + su parte del ahorro privativo
+    gross_participant = comm_sav_eur_pp + priv_sav_eur
     cf_part, payback_part, net25_part = _calc_cashflow(
         total_pp, gross_participant, ibi_annual_with_priv, MAINTENANCE_PER_OWNER
     )
 
-    # Non-participant: community savings only + IBI (community only)
+    # No participante: solo su parte del ahorro comunitario
     cf_nopart, payback_nopart, net25_nopart = _calc_cashflow(
-        comm_cost_pp, comm_sav_eur, ibi_annual_no_priv, MAINTENANCE_PER_OWNER
+        comm_cost_pp, comm_sav_eur_pp, ibi_annual_no_priv, MAINTENANCE_PER_OWNER
     )
 
-    # Totals Y1
-    total_y1_part = (gross_participant - MAINTENANCE_PER_OWNER) + ibi_annual_with_priv
-    total_y1_nopart = comm_net_y1 + ibi_annual_no_priv
+    # Totals Y1 (por propietario)
+    total_y1_part   = (gross_participant - MAINTENANCE_PER_OWNER) + ibi_annual_with_priv
+    total_y1_nopart = (comm_sav_eur_pp   - MAINTENANCE_PER_OWNER) + ibi_annual_no_priv
 
     roi_part = (net25_part / total_pp * 100) if total_pp > 0 else 0
     roi_nopart = (net25_nopart / comm_cost_pp * 100) if comm_cost_pp > 0 else 0
@@ -334,15 +373,15 @@ def calculate_scenario(inp: ScenarioInput) -> ScenarioResult:
             autoconsumo_kwh=round(comm_ac, 0),
             excedentes_kwh=round(comm_exc, 0),
             savings_pct=round(comm_sav_pct, 1),
-            savings_eur_y1=round(comm_sav_eur, 2),
-            maintenance_per_dwelling=MAINTENANCE_PER_OWNER,
+            savings_eur_y1=round(COMMON_GROSS_SAVINGS_Y1, 2),
+            maitenance_community_annual=MAINTENANCE_COMMUNITY_ANNUAL,
             net_savings_y1=round(comm_net_y1, 2),
         ),
         private=PrivateDetail(
             cost_per_participant=round(priv_cost_pp, 2),
             energy_produced_kwh=round(priv_energy_pp, 0),
             autoconsumo_kwh=round(priv_ac_pp, 0),
-            excedentes_kwh=round(priv_exc / n, 0),
+            excedentes_kwh=round(priv_exc_pp, 0),
             savings_pct=round(priv_sav_pct, 1),
             savings_eur_y1=round(priv_sav_eur, 2),
         ),
@@ -366,9 +405,9 @@ def calculate_scenario(inp: ScenarioInput) -> ScenarioResult:
         ),
         financing=FinancingDetail(
             monthly_community_only=round(mp_comm, 2),
-            monthly_with_private=round(mp_total, 2),
+            monthly_private_only=round(mp_priv, 2),
             total_cost_community_only=round(mp_comm * FINANCING_MONTHS, 2),
-            total_cost_with_private=round(mp_total * FINANCING_MONTHS, 2),
+            total_cost_private_only=round(mp_priv * FINANCING_MONTHS, 2),
         ),
         maintenance=MaintenanceDetail(
             community_annual=MAINTENANCE_COMMUNITY_ANNUAL,
@@ -384,6 +423,10 @@ def calculate_scenario(inp: ScenarioInput) -> ScenarioResult:
         net_benefit_25y_non_participant=net25_nopart,
         roi_25y_participant=round(roi_part, 1),
         roi_25y_non_participant=round(roi_nopart, 1),
+        energy_savings_y1_non_participant=round(comm_sav_eur_pp, 2),
+        energy_savings_y1_participant=round(gross_participant, 2),
+        ibi_savings_y1_non_participant=round(ibi_annual_no_priv, 2),
+        ibi_savings_y1_participant=round(ibi_annual_with_priv, 2),
         yearly_cashflow_participant=cf_part,
         yearly_cashflow_non_participant=cf_nopart,
     )

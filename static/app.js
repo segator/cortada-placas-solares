@@ -27,7 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
         loadScenario(parseInt(slider.value));
     });
 
-    loadScenario(24);
+    loadScenario(28);
+    loadConstants();
     // loadComparison(); // COMENTADO - Gráfico de comparación deshabilitado
 });
 
@@ -42,8 +43,81 @@ async function loadScenario(n) {
     updateProfiles(profiles);
 }
 
-async function loadComparison() {
-    const res = await fetch("/api/compare");
+async function loadConstants() {
+    const res = await fetch("/api/constants");
+    const c = await res.json();
+    updateConstants(c);
+}
+
+function updateConstants(c) {
+    const set = (id, html) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+    };
+
+    // ── Hero ───────────────────────────────────────────────
+    set("hero-panels",      c.total_panels);
+    set("hero-kwp",         fmtDec(c.total_kwp, 2));
+    set("hero-kwh",         fmt(c.total_production_kwh));
+    set("hero-cost",        fmt(c.total_cost) + " \u20ac");
+    set("hero-cost-fin",    fmt(c.loan_total_with_financing) + " \u20ac");
+
+    // ── Info cards ─────────────────────────────────────────
+    set("info-prod",        `<strong>Producci\u00f3n:</strong> ${fmt(c.total_production_kwh)} kWh/a\u00f1o`);
+    set("info-split",       `<strong>Reparto:</strong> ${c.common_ratio_pct}% com\u00fan \u00b7 ${c.private_ratio_pct}% privado`);
+    set("info-ac-common",   `<strong>Autoconsumo com\u00fan:</strong> ${c.autoconsumo_common_pct}%`);
+    set("info-ac-private",  `<strong>Autoconsumo privado:</strong> ${c.autoconsumo_private_pct}%`);
+    set("info-price-light", `<strong>Subida luz estimada:</strong> +${c.electricity_price_increase_pct}% anual`);
+    set("info-degradation", `<strong>Degradaci\u00f3n paneles:</strong> ${c.panel_degradation_pct}% anual`);
+    set("info-fin-months",  `<strong>Plazo:</strong> ${c.financing_months} meses`);
+    set("info-fin-tin",     `<strong>TIN:</strong> ${fmtDec(c.financing_tin_pct, 2)}%`);
+    set("info-fin-tae",     `<strong>TAE:</strong> ${fmtDec(c.financing_tae_pct, 2)}%`);
+    set("info-maint-total", `<strong>Coste anual comunidad:</strong> ${fmt(c.maintenance_annual)} \u20ac/a\u00f1o`);
+    set("info-maint-pp",    `<strong>Por vecino:</strong> ~${fmt(c.maintenance_per_owner)} \u20ac/a\u00f1o`);
+    set("info-ibi-rate",    `<strong>IBI:</strong> ${c.ibi_bonification_rate_pct}% durante ${c.ibi_bonification_years} a\u00f1os (Sant Cugat)`);
+    set("info-ibi-cap",     `<strong>L\u00edmite IBI:</strong> ${c.ibi_cap_pct}% del coste instalaci\u00f3n`);
+    set("info-irpf-rate",   `<strong>IRPF:</strong> ${c.irpf_pct}-60% del coste (renta)`);
+
+    // ── KPI subs ───────────────────────────────────────────
+    set("comm-monthly-sub", `estimada a ${c.financing_months} meses, 0 \u20ac entrada`);
+    set("priv-monthly-sub", `parte extra privativa \u00b7 ${c.financing_months} meses`);
+
+    // ── Loan box ───────────────────────────────────────────
+    set("loan-monthly",  fmtDec(c.loan_monthly_total, 2) + " \u20ac");
+    set("loan-tin",      fmtDec(c.financing_tin_pct, 2) + "%");
+    set("loan-tae",      fmtDec(c.financing_tae_pct, 2) + "%");
+    set("loan-interest", fmtDec(c.loan_total_interest, 2) + " \u20ac");
+    set("loan-notary",   `Notar\u00eda: ${fmtDec(c.financing_notary, 2)} \u20ac`);
+
+    // ── Nota de supuestos ──────────────────────────────────
+    set("assumptions-note",
+        `* Los c\u00e1lculos asumen una <strong>subida del precio de la electricidad del ${c.electricity_price_increase_pct}% anual</strong> ` +
+        `y una degradaci\u00f3n de los paneles del ${c.panel_degradation_pct}% anual. ` +
+        `Cuanto m\u00e1s suba la luz, m\u00e1s ahorras con las placas.`);
+
+    // ── Footer ─────────────────────────────────────────────
+    set("foot-panels",      `${c.total_panels} paneles LONGi 450W = ${fmtDec(c.total_kwp, 2)} kWp`);
+    set("foot-prod",        `Producci\u00f3n a\u00f1o 1: ${fmt(c.total_production_kwh)} kWh`);
+    set("foot-cost",        `Coste total (IVA incl.): ${fmt(c.total_cost)} \u20ac`);
+    set("foot-split",       `Reparto: ${c.common_ratio_pct}% com\u00fan / ${c.private_ratio_pct}% privado`);
+    set("foot-ac-common",   `Autoconsumo zonas comunes: ${c.autoconsumo_common_pct}%`);
+    set("foot-ac-private",  `Autoconsumo viviendas: ${c.autoconsumo_private_pct}%`);
+    set("foot-price-kwh",   `Precio medio electricidad: ${c.electricity_price.toFixed(2)} \u20ac/kWh`);
+    set("foot-exc-kwh",     `Compensaci\u00f3n excedentes: ${c.excedentes_price.toFixed(2)} \u20ac/kWh`);
+    set("foot-price-inc",   `Subida precio luz: +${c.electricity_price_increase_pct}% anual`);
+    set("foot-degradation", `Degradaci\u00f3n paneles: -${c.panel_degradation_pct}% anual`);
+    set("foot-lifetime",    `Vida \u00fatil: ${c.project_lifetime_years} a\u00f1os`);
+    set("foot-fin-months",  `Financiaci\u00f3n: ${c.financing_months} meses, 0 \u20ac entrada`);
+    set("foot-fin-rates",   `TIN: ${fmtDec(c.financing_tin_pct, 2)}% \u00b7 TAE: ${fmtDec(c.financing_tae_pct, 2)}%`);
+    set("foot-maint",       `Mantenimiento: ${fmt(c.maintenance_annual)} \u20ac/a\u00f1o (~${fmt(c.maintenance_per_owner)} \u20ac/vecino)`);
+    set("foot-ibi-avg",     `IBI estimado medio: ${fmt(c.avg_annual_ibi)} \u20ac/a\u00f1o`);
+    set("foot-ibi-ded",     `IBI Sant Cugat: ${c.ibi_bonification_rate_pct}% \u00d7 ${c.ibi_bonification_years} a\u00f1os`);
+    set("foot-ibi-cap",     `Tope IBI: ${c.ibi_cap_pct}% del coste instalaci\u00f3n`);
+    set("foot-irpf",        `IRPF: ${c.irpf_pct}% (puede ser 40-60%)`);
+    set("foot-irpf-max",    `Tope base IRPF: ${fmt(c.irpf_max_base)} \u20ac/a\u00f1o`);
+}
+
+async function loadComparison() {    const res = await fetch("/api/compare");
     const data = await res.json();
     updateCompareChart(data);
 }
@@ -55,19 +129,18 @@ function updateAll(d) {
     document.getElementById("comm-monthly").textContent = fmtDec(d.financing.monthly_community_only, 2) + " \u20ac/mes";
     document.getElementById("comm-savings").textContent = fmt(d.community.net_savings_y1) + " \u20ac";
     document.getElementById("comm-savings-sub").textContent =
-        `bruto: ${fmt(d.community.savings_eur_y1)} \u20ac - mant: ${d.community.maintenance_per_dwelling} \u20ac`;
+        `bruto: ${fmt(d.community.savings_eur_y1)} \u20ac - mant: ${d.community.maitenance_community_annual} \u20ac`;
     document.getElementById("comm-pct").textContent = fmtDec(d.community.savings_pct) + "%";
-    document.getElementById("comm-energy").textContent = fmt(d.community.autoconsumo_kwh);
+    document.getElementById("comm-energy").textContent = fmt(d.community.energy_produced_kwh);
+    document.getElementById("comm-payback").textContent = fmtDec(d.payback_non_participant, 1) + " años";
 
     // Private KPIs
     document.getElementById("priv-cost").textContent = fmt(d.private.cost_per_participant) + " \u20ac";
     document.getElementById("priv-cost-sub").textContent =
         `entre ${d.num_participants} participantes`;
-    const privateMonthly = Math.max(d.financing.monthly_with_private - d.financing.monthly_community_only, 0);
-    document.getElementById("priv-monthly").textContent = fmtDec(privateMonthly, 2) + " \u20ac/mes";
+    document.getElementById("priv-monthly").textContent = fmtDec(d.financing.monthly_private_only, 2) + " \u20ac/mes";
     document.getElementById("priv-savings").textContent = fmt(d.private.savings_eur_y1) + " \u20ac";
-    document.getElementById("priv-pct").textContent = fmtDec(d.private.savings_pct) + "%";
-    document.getElementById("priv-energy").textContent = fmt(d.private.autoconsumo_kwh);
+    document.getElementById("priv-energy").textContent = fmt(d.private.energy_produced_kwh);
 
     // IBI
     document.getElementById("ibi-no-priv").textContent =
@@ -93,18 +166,22 @@ function updateAll(d) {
     document.getElementById("irpf-with-priv").textContent =
         fmt(d.irpf.deduction_with_private) + " \u20ac";
 
-    // Totals
-    document.getElementById("tot-cost-no").textContent = fmt(d.total_cost_non_participant) + " \u20ac";
-    document.getElementById("tot-sav-no").textContent = "+" + fmt(d.total_savings_y1_non_participant) + " \u20ac";
-    document.getElementById("tot-payback-no").textContent = fmtDec(d.payback_non_participant) + " a\u00f1os";
-    document.getElementById("tot-cuota-no").textContent = fmtDec(d.financing.monthly_community_only, 2) + " \u20ac/mes";
-    document.getElementById("tot-benef-no").textContent = "+" + fmt(d.net_benefit_25y_non_participant) + " \u20ac";
+    // Totals — Solo comunitaria
+    document.getElementById("tot-cost-no").textContent     = fmt(d.total_cost_non_participant) + " \u20ac";
+    document.getElementById("tot-energy-no").textContent   = "+" + fmt(d.energy_savings_y1_non_participant) + " \u20ac/a\u00f1o";
+    document.getElementById("tot-ibi-no").textContent      = "+" + fmt(d.ibi_savings_y1_non_participant) + " \u20ac/a\u00f1o";
+    document.getElementById("tot-payback-no").textContent  = fmtDec(d.payback_non_participant) + " a\u00f1os";
+    document.getElementById("tot-cuota-no").textContent    = fmtDec(d.financing.monthly_community_only, 2) + " \u20ac/mes";
+    document.getElementById("tot-benef-no").textContent    = "+" + fmt(d.net_benefit_25y_non_participant) + " \u20ac";
 
-    document.getElementById("tot-cost-yes").textContent = fmt(d.total_cost_participant) + " \u20ac";
-    document.getElementById("tot-sav-yes").textContent = "+" + fmt(d.total_savings_y1_participant) + " \u20ac";
-    document.getElementById("tot-payback-yes").textContent = fmtDec(d.payback_participant) + " a\u00f1os";
-    document.getElementById("tot-cuota-yes").textContent = fmtDec(d.financing.monthly_with_private, 2) + " \u20ac/mes";
-    document.getElementById("tot-benef-yes").textContent = "+" + fmt(d.net_benefit_25y_participant) + " \u20ac";
+    // Totals — Comunitaria + Privativa
+    document.getElementById("tot-cost-yes").textContent    = fmt(d.total_cost_participant) + " \u20ac";
+    document.getElementById("tot-energy-yes").textContent  = "+" + fmt(d.energy_savings_y1_participant) + " \u20ac/a\u00f1o";
+    document.getElementById("tot-ibi-yes").textContent     = "+" + fmt(d.ibi_savings_y1_participant) + " \u20ac/a\u00f1o";
+    document.getElementById("tot-payback-yes").innerHTML =
+        `<a href="#perfiles" style="color:#10b981;font-weight:600;text-decoration:none;">Ver según tu perfil ↓</a>`;
+    document.getElementById("tot-cuota-yes").textContent   = fmtDec(d.financing.monthly_community_only + d.financing.monthly_private_only, 2) + " \u20ac/mes";
+    document.getElementById("tot-benef-yes").textContent   = "+" + fmt(d.net_benefit_25y_participant) + " \u20ac";
 
     // Charts - COMENTADO POR SIMPLICIDAD
     // updateCashflowChart(d);
@@ -300,6 +377,11 @@ function updateProfiles(data) {
                 </div>
                 <div class="profile-saving">Ahorras ${fmt(p.savings_monthly)} \u20ac/mes (${fmt(p.pct_saved)}% de tu factura)</div>
                 <div class="profile-detail">${fmt(p.solar_kwh_used)} kWh autoconsumidos + ${fmt(p.excedentes_kwh)} kWh excedentes (${fmt(p.excedentes_eur)} \u20ac compensados)</div>
+                <div class="profile-payback">
+                    <span class="payback-label">Recuperas la inversión</span>
+                    <span class="payback-years">${fmtDec(p.payback_years, 1)} años</span>
+                </div>
+                <div class="profile-net25">Beneficio neto a 25 años: <strong>+${fmt(p.net_benefit_25y)} \u20ac</strong></div>
             </div>
         `)
         .join("");
