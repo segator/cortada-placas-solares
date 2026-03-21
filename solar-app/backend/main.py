@@ -1,8 +1,15 @@
+import os
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from solar_calc import ScenarioInput, calculate_scenario, TOTAL_PRODUCTION_Y1_KWH, PRIVATE_ENERGY_RATIO
 
 app = FastAPI(title="Solar Benet Cortada")
+
+# Resolve frontend directory relative to this file (works locally and on Railway)
+BASE_DIR = Path(__file__).resolve().parent
+FRONTEND_DIR = BASE_DIR / "static"
 
 # Household profiles for the "types of home" section
 PROFILES = [
@@ -99,4 +106,10 @@ def get_profiles(participants: int = 24):
     return {"participants": n, "solar_kwh_per_participant": round(solar_pp, 0), "profiles": results}
 
 
-app.mount("/", StaticFiles(directory="../frontend", html=True), name="frontend")
+app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
+
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
