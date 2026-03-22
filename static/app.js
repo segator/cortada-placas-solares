@@ -173,6 +173,10 @@ function updateAll(d) {
 
     // Totals — Solo comunitaria
     document.getElementById("tot-cost-no").textContent     = fmt(d.total_cost_non_participant) + " \u20ac";
+    const netNo = d.total_cost_non_participant - d.ibi.total_7y_no_private - d.irpf.deduction_no_private;
+    document.getElementById("tot-net-no").textContent      = fmt(Math.max(0, netNo)) + " \u20ac";
+    document.getElementById("tot-net-no-detail").textContent =
+        `-${fmt(d.ibi.total_7y_no_private)} \u20ac IBI \u00b7 -${fmt(d.irpf.deduction_no_private)} \u20ac IRPF`;
     document.getElementById("tot-energy-no").textContent   = "+" + fmt(d.energy_savings_y1_non_participant) + " \u20ac/a\u00f1o";
     document.getElementById("tot-ibi-no").textContent      = "+" + fmt(d.ibi_savings_y1_non_participant) + " \u20ac/a\u00f1o";
     document.getElementById("tot-payback-no").textContent  = fmtDec(d.payback_non_participant) + " a\u00f1os";
@@ -181,6 +185,10 @@ function updateAll(d) {
 
     // Totals — Comunitaria + Privativa
     document.getElementById("tot-cost-yes").textContent    = fmt(d.total_cost_participant) + " \u20ac";
+    const netYes = d.total_cost_participant - d.ibi.total_7y_with_private - d.irpf.deduction_with_private;
+    document.getElementById("tot-net-yes").textContent     = fmt(Math.max(0, netYes)) + " \u20ac";
+    document.getElementById("tot-net-yes-detail").textContent =
+        `-${fmt(d.ibi.total_7y_with_private)} \u20ac IBI \u00b7 -${fmt(d.irpf.deduction_with_private)} \u20ac IRPF`;
     document.getElementById("tot-energy-yes").textContent  = "+" + fmt(d.energy_savings_y1_participant) + " \u20ac/a\u00f1o";
     document.getElementById("tot-ibi-yes").textContent     = "+" + fmt(d.ibi_savings_y1_participant) + " \u20ac/a\u00f1o";
     document.getElementById("tot-payback-yes").innerHTML =

@@ -214,6 +214,21 @@ h2 { font-size: 2rem; font-weight: 700; margin-bottom: 12px; }
     background: #f0fdf4; margin: 8px -12px -4px; padding: 12px;
     border-radius: 8px; border-bottom: none; font-weight: 700;
 }
+.total-row.net-investment {
+    background: #f0fdf4;
+    margin: 4px -12px; padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #bbf7d0;
+    border-bottom: 1px solid #bbf7d0;
+    align-items: flex-start;
+}
+.net-detail {
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 400;
+    display: block;
+    margin-top: 2px;
+}
 .total-val { font-weight: 700; font-family: 'Poppins', sans-serif; }
 .green-text { color: #10b981; }
 
