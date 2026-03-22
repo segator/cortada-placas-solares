@@ -68,19 +68,6 @@
      ═══════════════════════════════════════════════════════════ -->
 <section class="simulator" id="simulador">
     <div class="container">
-        <h2>Simulador: ¿Cuántos vecinos participan?</h2>
-        <p class="section-desc">Mueve el slider para ver cómo cambian los números de la <strong>parte privativa</strong>. La parte comunitaria no cambia.</p>
-
-        <div class="slider-box">
-            <label for="participants">Propietarios con placas privativas:</label>
-            <div class="slider-row">
-                <input type="range" id="participants" min="2" max="28" step="2" value="28">
-                <span class="slider-value" id="slider-val">28</span>
-            </div>
-            <div class="slider-labels">
-                <span>2</span><span>4</span><span>8</span><span>12</span><span>16</span><span>20</span><span>24</span><span>28</span>
-            </div>
-        </div>
 
         <!-- ── COMMUNITY KPIs (fixed) ── -->
         <div class="section-header community-header">
@@ -123,8 +110,20 @@
 
         <!-- ── PRIVATE KPIs (variable) ── -->
         <div class="section-header private-header">
-            <span class="section-icon">🏠</span>
-            <h3>Parte Privativa <small>(solo participantes)</small></h3>
+            <div class="private-header-top">
+                <span class="section-icon">🏠</span>
+                <h3>Parte Privativa <small>(solo participantes)</small></h3>
+            </div>
+            <div class="slider-box">
+                <label for="participants">Simulador — ¿Cuántos vecinos participan?</label>
+                <div class="slider-row">
+                    <input type="range" id="participants" min="2" max="28" step="2" value="28">
+                    <span class="slider-value" id="slider-val">28</span>
+                </div>
+                <div class="slider-labels">
+                    <span>2</span><span>4</span><span>8</span><span>12</span><span>16</span><span>20</span><span>24</span><span>28</span>
+                </div>
+            </div>
         </div>
         <div class="kpi-grid" id="kpi-private">
             <div class="kpi-card">

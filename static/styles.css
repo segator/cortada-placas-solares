@@ -99,7 +99,24 @@ h2 { font-size: 2rem; font-weight: 700; margin-bottom: 12px; }
 .section-header h3 { font-size: 1.3rem; font-weight: 700; }
 .section-header small { font-weight: 400; color: #64748b; font-size: 0.85rem; }
 .community-header { border-bottom-color: #3b82f6; }
-.private-header { border-bottom-color: #10b981; }
+.private-header {
+    border-bottom-color: #10b981;
+    display: block;              /* override flex para poder tener título + slider apilados */
+    padding-bottom: 20px;
+}
+.private-header-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.private-header .slider-box {
+    margin-top: 0;
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 12px;
+    padding: 16px 20px;
+}
 .ibi-header { border-bottom-color: #f59e0b; }
 .totals-header { border-bottom-color: #8b5cf6; }
 
@@ -116,8 +133,7 @@ h2 { font-size: 2rem; font-weight: 700; margin-bottom: 12px; }
 .kpi-label { font-size: 0.82rem; color: #64748b; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
 .kpi-value { font-family: 'Poppins', sans-serif; font-size: 1.9rem; font-weight: 800; color: #0f172a; }
 .kpi-sub { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
-.kpi-pct-badge {
-    display: inline-block;
+.ibi-header { border-bottom-color: #f59e0b; }
     margin-top: 8px;
     background: rgba(16, 185, 129, 0.1);
     color: #059669;
