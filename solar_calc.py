@@ -50,7 +50,7 @@ PANEL_DEGRADATION = 0.004
 IBI_BONIFICATION_RATE = 0.50  # 50% of your IBI bill
 IBI_BONIFICATION_YEARS = 7
 IBI_CAP_RATIO = 0.60  # max 60% of installation cost
-AVG_ANNUAL_IBI = 900  # estimated average IBI bill in Sant Cugat
+AVG_ANNUAL_IBI = 1000  # estimated average IBI bill in Sant Cugat
 
 # Maintenance
 MAINTENANCE_ANNUAL = 560  # total community
@@ -187,6 +187,7 @@ class ScenarioResult(BaseModel):
     num_participants: int
     total_dwellings: int
     total_project_cost: float
+    total_production_kwh: float  # kWh totales instalación año 1
 
     community: CommunityDetail
     private: PrivateDetail
@@ -367,6 +368,7 @@ def calculate_scenario(inp: ScenarioInput) -> ScenarioResult:
         num_participants=n,
         total_dwellings=TOTAL_DWELLINGS,
         total_project_cost=TOTAL_COST_IVA,
+        total_production_kwh=TOTAL_PRODUCTION_Y1_KWH,
         community=CommunityDetail(
             cost_per_dwelling=round(comm_cost_pp, 2),
             energy_produced_kwh=round(comm_energy, 0),

@@ -111,7 +111,7 @@ def get_constants():
 
 
 @app.get("/api/scenario")
-def get_scenario(participants: int = 24, avg_ibi: float = 900):
+def get_scenario(participants: int = TOTAL_DWELLINGS, avg_ibi: float = AVG_ANNUAL_IBI):
     return calculate_scenario(ScenarioInput(
         num_private_participants=participants,
         avg_annual_ibi=avg_ibi,
@@ -119,7 +119,7 @@ def get_scenario(participants: int = 24, avg_ibi: float = 900):
 
 
 @app.get("/api/compare")
-def compare_scenarios(avg_ibi: float = 900):
+def compare_scenarios(avg_ibi: float = AVG_ANNUAL_IBI):
     counts = [2, 4, 8, 12, 16, 20, 24]
     return {
         str(n): calculate_scenario(ScenarioInput(

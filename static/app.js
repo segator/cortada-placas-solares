@@ -16,9 +16,10 @@ const C = {
 };
 
 let chartCashflow, chartEnergy, chartCompare, chartSavings;
+let _constants = null;
 
 // ── Init ────────────────────────────────────────────────────
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const slider = document.getElementById("participants");
     const sliderVal = document.getElementById("slider-val");
 
@@ -27,9 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
         loadScenario(parseInt(slider.value));
     });
 
+    await loadConstants();   // primero: necesario para que _constants esté listo
     loadScenario(28);
-    loadConstants();
-    // loadComparison(); // COMENTADO - Gráfico de comparación deshabilitado
 });
 
 async function loadScenario(n) {
@@ -45,8 +45,8 @@ async function loadScenario(n) {
 
 async function loadConstants() {
     const res = await fetch("/api/constants");
-    const c = await res.json();
-    updateConstants(c);
+    _constants = await res.json();
+    updateConstants(_constants);
 }
 
 function updateConstants(c) {
@@ -81,7 +81,6 @@ function updateConstants(c) {
     // ── KPI subs ───────────────────────────────────────────
     set("comm-monthly-sub", `estimada a ${c.financing_months} meses, 0 \u20ac entrada`);
     set("priv-monthly-sub", `parte extra privativa \u00b7 ${c.financing_months} meses`);
-
     // ── Loan box ───────────────────────────────────────────
     set("loan-monthly",  fmtDec(c.loan_monthly_total, 2) + " \u20ac");
     set("loan-tin",      fmtDec(c.financing_tin_pct, 2) + "%");
@@ -141,6 +140,12 @@ function updateAll(d) {
     document.getElementById("priv-monthly").textContent = fmtDec(d.financing.monthly_private_only, 2) + " \u20ac/mes";
     document.getElementById("priv-savings").textContent = fmt(d.private.savings_eur_y1) + " \u20ac";
     document.getElementById("priv-energy").textContent = fmt(d.private.energy_produced_kwh);
+
+    const total = d.total_production_kwh;
+    document.getElementById("comm-energy-pct").textContent =
+        fmtDec(d.community.energy_produced_kwh / total * 100, 1) + "% de la instalaci\u00f3n";
+    document.getElementById("priv-energy-pct").textContent =
+        fmtDec(d.private.energy_produced_kwh / total * 100, 1) + "% por propietario";
 
     // IBI
     document.getElementById("ibi-no-priv").textContent =
